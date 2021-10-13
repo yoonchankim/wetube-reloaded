@@ -1,0 +1,25 @@
+{
+  "name": "wetube",
+  "version": "1.0.0",
+  "description": "the best way to watch videos",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoonchankim/wetube-reloaded.git"
+  },
+  "scripts": {
+    "win": "node index.js"
+  },
+  "author": "yoonchan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yoonchankim/wetube-reloaded/issues"
+  },
+  "homepage": "https://github.com/yoonchankim/wetube-reloaded#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/preset-env": "^7.15.8"
+  }
+}

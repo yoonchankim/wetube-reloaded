@@ -13,3 +13,10 @@
 /videos/:id/edit -> Edit Video
 /videos/:id/delete -> Delete Video
 /videos/upload -> Upload Video
+
+goal
+->CRUD
+C:create
+R:read
+U:update
+D:delete

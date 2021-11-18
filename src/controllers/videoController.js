@@ -1,7 +1,8 @@
 import Video from "../models/Video"
 export const trending = async(req, res) =>{
   const videos=await Video.find({}); 
-  return res.render("home",{pageTitle : "Home",videos:[]});
+  console.log(videos);
+  return res.render("home",{pageTitle : "Home",videos});
 } 
 export const watch=(req,res)=>{
   const id=req.params.id;
@@ -20,7 +21,20 @@ export const search=(req,res)=>res.send("Search");
 export const upload=(req,res)=>{
   return res.render("upload",{pageTitle:"Upload Video"});
 };
-export const postUpload=(req,res)=>{
+export const postUpload=async(req,res)=>{
+  const title=req.body.title;
+  const description=req.body.description;
+  const hashtags=req.body.hashtags;
+  await Video.create({
+      title,
+      description,
+      createdAt:Date.now(),
+      hashtags:hashtags.split(",").map(word=>`#${word}`),
+      meta:{
+        views:0,
+        rating:0
+      }
+  });
   return res.redirect("/");
 };
 export const deleteVideo=(req,res)=>{

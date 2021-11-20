@@ -44,7 +44,7 @@ export const postUpload=async(req,res)=>{
   try{await Video.create({
     title,
     description,
-    hashtags:hashtags.split(",").map((word)=>(word.startsWith(`#`)?word:`#${word}`)),
+    hashtags
   });}
   catch(error){
     return res.render("upload",{pageTitle:"Upload Video",errorMessage:error._message});

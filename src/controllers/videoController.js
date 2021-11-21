@@ -1,6 +1,6 @@
 import Video from "../models/Video"
 export const trending = async(req, res) =>{
-  const videos=await Video.find({}); 
+  const videos=await Video.find({}).sort({createdAt:"desc"}); 
   return res.render("home",{pageTitle : "Home",videos});
 } 
 export const watch=async(req,res)=>{
@@ -24,16 +24,27 @@ export const postEdit=async(req,res)=>{
   const title=req.body.title;
   const description=req.body.description;
   const hashtags=req.body.hashtags;
-  const video=await Video.exist({_id:id});
+  const video=await Video.exists({_id:id});
   if(!video){
     return res.render("404",{pageTitle:"Video Not Found"});
   }
   await Video.findByIdAndUpdate(id,{
-    title,description,hashtags:hashtags.split(",").map((word)=>(word.startsWith(`#`)?word:`#${word}`))
+    title,description,hashtags:Video.formatHashtags(hashtags)
   })
   return res.redirect(`/videos/${id}`);
 };
-export const search=(req,res)=>res.send("Search");
+export const search=async(req,res)=>{
+  const keyword=req.query.keyword;
+  let videos=[];
+  if(keyword){
+    videos=await Video.find({
+      title:{
+        $regex:new RegExp(keyword,"i")
+      }
+    })
+  }
+  return res.render("search",{pageTitle:"Search",videos});
+};
 export const upload=(req,res)=>{
   return res.render("upload",{pageTitle:"Upload Video"});
 };
@@ -44,13 +55,15 @@ export const postUpload=async(req,res)=>{
   try{await Video.create({
     title,
     description,
-    hashtags
+    hashtags:Video.formatHashtags(hashtags)
   });}
   catch(error){
     return res.render("upload",{pageTitle:"Upload Video",errorMessage:error._message});
   } 
   return res.redirect("/");
 };
-export const deleteVideo=(req,res)=>{
-    return res.send("Delete Video");
+export const deleteVideo=async(req,res)=>{
+  const id=req.params.id;
+  await Video.findByIdAndDelete(id);
+  return res.redirect("/");
 }

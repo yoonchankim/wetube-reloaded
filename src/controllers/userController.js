@@ -7,7 +7,15 @@ export const postJoin=async(req,res)=>{
     const username=req.body.username;
     const email=req.body.email;
     const password=req.body.password;
+    const password2=req.body.password2;
     const location=req.body.location;
+    if(password!==password2){
+        return res.render("Join",{pageTitle:"Join",errorMessage:"Password confirmation does not match"});  
+    }
+    const exists=await User.exists({$or:[{username},{email}]});
+    if(exists){
+        return res.render("Join",{pageTitle:"Join",errorMessage:"This username/email is already taken."});  
+    }
     await User.create({name,username,email,password,location,});
     return res.redirect("/login");
 }

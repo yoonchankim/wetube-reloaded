@@ -36,7 +36,7 @@ export const postLogin=async(req,res)=>{
     if(!exists){
         return res.status(400).render("login",{pageTitle:"Login",errorMessage:"An account with this username does not exists."})
     }
-    res.end();
+    return res.end();
 };
 export const logout=(req,res)=>res.send("Log Out");
 export const see=(req,res)=>res.send("See User");

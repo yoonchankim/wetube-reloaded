@@ -6,18 +6,33 @@ html(lang="ko")
     body
         header
             h1=pageTitle
-            nav 
-                ul 
-                    li 
-                        a(href="/videos/upload") Upload Video
-                    li 
-                        a(href="/") Home
-                    li 
-                        a(href="/search") Search  
-                    li 
-                        a(href="/join") Join  
-                    li 
-                        a(href="/login") Login 
+            h2 #{sexy}
+            if loggedIn
+                nav 
+                    ul
+                        li 
+                            a(href="/videos/upload") Upload Video
+                        li 
+                            a(href="/") Home
+                        li 
+                            a(href="/search") Search  
+                        li 
+                            a(href="/logout") Log Out
+                        li 
+                            a(href="/my-profile") #{loggedInUsers.name}의 profile
+            else
+                nav 
+                    ul 
+                        li 
+                            a(href="/videos/upload") Upload Video
+                        li 
+                            a(href="/") Home
+                        li 
+                            a(href="/search") Search  
+                        li 
+                            a(href="/join") Join  
+                        li 
+                            a(href="/login") Login 
         main
             block content
     include partials/footer

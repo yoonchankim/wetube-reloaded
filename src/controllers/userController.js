@@ -45,5 +45,20 @@ export const postLogin=async(req,res)=>{
     req.session.user=user;
     return res.status(400).redirect("/");
 };
+export const startGithubLogin=(req,res)=>{
+    const baseUrl='https://github.com/login/oauth/authorize';
+    const config={
+        client_id:"55c3cfda5e0a8e716916",
+        allow_signup:false,
+        scope:"read:user user:email"
+    }
+    const params=new URLSearchParams(config).toString();
+    const finalUrl=`${baseUrl}?${params}`;
+    return res.redirect(finalUrl);
+    //https://github.com/login/oauth/authorize?client_id=55c3cfda5e0a8e716916&allow_signup=false&scope=user:email
+};
+export const finshGithubLogin=(req,res)=>{
+    
+};
 export const logout=(req,res)=>res.send("Log Out");
 export const see=(req,res)=>res.send("See User");

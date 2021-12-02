@@ -35,7 +35,7 @@ export const getLogin=(req,res)=>{
 export const postLogin=async(req,res)=>{
     const username=req.body.username;
     const password=req.body.password;
-    const user=await User.findOne({username});
+    const user=await User.findOne({username,socialOnly:false});
     if(!user){
         return res.status(400).render("login",{pageTitle:"Login",errorMessage:"An account with this username does not exists."})
     }   
@@ -106,6 +106,7 @@ export const finshGithubLogin=async (req,res)=>{
             return res.redirect("/");
           } else {
             const user = await User.create({
+                avatarUrl:userData.avatar_url,
               name: userData.name,
               username: userData.login,
               email: emailObj.email,
@@ -122,5 +123,8 @@ export const finshGithubLogin=async (req,res)=>{
         return res.redirect("/login");
     }
 };
-export const logout=(req,res)=>res.send("Log Out");
+export const logout=(req,res)=>{
+    req.session.destroy();
+    return res.redirect("/");
+};
 export const see=(req,res)=>res.send("See User");

@@ -19,7 +19,9 @@ html(lang="ko")
                         li 
                             a(href="/users/logout") Log Out
                         li 
-                            a(href="/my-profile") #{loggedInUsers.username}의 profile
+                            a(href="/users/my-profile") #{loggedInUsers.username}의 profile
+                        li 
+                            a(href="/users/edit") Edit Profile
             else
                 nav 
                     ul 

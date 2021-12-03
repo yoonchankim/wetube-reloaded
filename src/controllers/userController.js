@@ -27,7 +27,12 @@ export const postJoin=async(req,res)=>{
         return res.status(404).render("join",{pageTitle:"Upload Video",errorMessage:error._message});
     }
 }
-export const edit =(req,res)=>res.send("Edit User");
+export const getEdit =(req,res)=>{
+return res.render("edit-profile",{pageTitle:"Edit Profile"})
+};
+export const postEdit=(req,res)=>{
+  return resq.render("edit-profile",{pageTitle:"Edit Profile"})
+  };
 export const remove =(req,res)=>res.send("Delete User");
 export const getLogin=(req,res)=>{
     return res.render("login",{pageTitle:"Login"})

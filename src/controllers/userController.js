@@ -30,8 +30,16 @@ export const postJoin=async(req,res)=>{
 export const getEdit =(req,res)=>{
 return res.render("edit-profile",{pageTitle:"Edit Profile"})
 };
-export const postEdit=(req,res)=>{
-  return resq.render("edit-profile",{pageTitle:"Edit Profile"})
+export const postEdit=async(req,res)=>{
+  const id=req.session.user._id
+  const name=req.body.name;
+  const email=req.body.email;
+  const username=req.body.username;
+  const location=req.body.location;
+  await User.findByIdAndUpdate(id,{
+    name,email,username,location
+  })
+  return res.render("edit-profile",{pageTitle:"Edit Profile"})
   };
 export const remove =(req,res)=>res.send("Delete User");
 export const getLogin=(req,res)=>{
@@ -49,7 +57,7 @@ export const postLogin=async(req,res)=>{
         return res.status(400).render("login",{pageTitle:"Login",errorMessage:"Wrong password."});
     }
     req.session.loggedIn=true;
-    req.session.user=user;
+    req.session.user=user; //findByIdUpdate해도 업데이트 안되는 이유 :pug파일에서 가져오는 locals는 session에서 가져오고 sessions는 로그인할때 저장되서 db만 바뀌고 pug파일에서 가져오는 local는 업데이트 되지 않는다. #8.3에서 이 에러 수정
     return res.status(400).redirect("/");
 };
 export const startGithubLogin=(req,res)=>{

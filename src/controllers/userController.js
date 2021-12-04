@@ -36,10 +36,19 @@ export const postEdit=async(req,res)=>{
   const email=req.body.email;
   const username=req.body.username;
   const location=req.body.location;
-  await User.findByIdAndUpdate(id,{
+  //email,username 유니크 에러 코드 챌린지
+  const findEmail=await User.findOne({email});
+  const findUsername=await User.findOne({username});
+  if(findEmail._id!=id||findUsername._id!=id){
+    return res.render("edit-profile",{pageTitle:"Edit Profile",errorMessage:"This username/email is already taken."})
+  }
+  //session이랑 비교해서 email,username이 바뀌었으면 exists({조건}) exists==true면 에러 뛰우고 아니면 계속 진행
+  //뒤에서 하면 안되는 이유:username,email이 이미 이 계정으로 바뀌었는데 있는지 찾아보면 자기 것이 있어서 당연히 존재한다고해서 에러 나옴
+  const updatedUser=await User.findByIdAndUpdate(id,{
     name,email,username,location
-  })
-  return res.render("edit-profile",{pageTitle:"Edit Profile"})
+  },{new:true})
+  req.session.user=updatedUser;
+  return res.redirect("/users/edit");
   };
 export const remove =(req,res)=>res.send("Delete User");
 export const getLogin=(req,res)=>{
@@ -98,7 +107,6 @@ export const finshGithubLogin=async (req,res)=>{
               },
             })
           ).json();
-        console.log(userData.login)
         const emailData = await (
             await fetch(`${apiUrl}/user/emails`, {
               headers: {

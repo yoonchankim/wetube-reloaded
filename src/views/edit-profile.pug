@@ -2,7 +2,10 @@ extends base
 block content 
     if(errorMessage)
         span #{errorMessage}
-    form(method="POST")
+    img(src="/"+loggedInUsers.avatarUrl,width="100",height="100")
+    form(method="POST",enctype="multipart/form-data")
+        label(for="avatar") Avatar
+        input(type="file",id="avatar",name="avatar",accept="image/*")
         input(name="name",placeholder="name",type="text",required,value=loggedInUsers.name)
         input(placeholder="Email",name="email",type="email",required,value=loggedInUsers.email)
         input(name="username",placeholder="Username",type="text",required,value=loggedInUsers.username)
@@ -12,3 +15,4 @@ block content
             hr
             a(href="change-password") Change Password &rarr;
         
+//- 이미지 src했는데도 이미지가 보여지는게 안되는 이유는 애초에 uploads/파일이름이란 라우터를 안만듬 그 라우터를 만드는게 #8.8 진행됨

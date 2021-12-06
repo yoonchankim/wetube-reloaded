@@ -36,6 +36,9 @@ export const postEdit=async(req,res)=>{
   const email=req.body.email;
   const username=req.body.username;
   const location=req.body.location;
+  const avatarUrl=req.body.avatarUrl;
+  const file=req.file;
+  console.log("file",file)
   //email,username 유니크 에러 코드 챌린지
   const findEmail=await User.findOne({email});
   const findUsername=await User.findOne({username});
@@ -45,7 +48,8 @@ export const postEdit=async(req,res)=>{
   //session이랑 비교해서 email,username이 바뀌었으면 exists({조건}) exists==true면 에러 뛰우고 아니면 계속 진행
   //뒤에서 하면 안되는 이유:username,email이 이미 이 계정으로 바뀌었는데 있는지 찾아보면 자기 것이 있어서 당연히 존재한다고해서 에러 나옴
   const updatedUser=await User.findByIdAndUpdate(id,{
-    name,email,username,location
+    avatarUrl:file?file.path:avatarUrl
+    ,name,email,username,location
   },{new:true})
   req.session.user=updatedUser;
   return res.redirect("/users/edit");

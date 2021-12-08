@@ -1,4 +1,5 @@
 import Video from "../models/Video"
+import User from "../models/User";
 export const trending = async(req, res) =>{
   const videos=await Video.find({}).sort({createdAt:"desc"}); 
   return res.render("home",{pageTitle : "Home",videos});
@@ -6,10 +7,11 @@ export const trending = async(req, res) =>{
 export const watch=async(req,res)=>{
   const id=req.params.id;
   const video=await Video.findById(id);
+  const owner=await User.findById(video.owner);
   if(video===null){
     return res.render("404",{pageTitle:"Video Not Found"});
   }
-  return res.render("watch",{pageTitle:video.title,video});
+  return res.render("watch",{pageTitle:video.title,video,owner});
 } 
 export const getEdit=async(req,res)=>{
   const id=req.params.id;
@@ -49,6 +51,7 @@ export const upload=(req,res)=>{
   return res.render("upload",{pageTitle:"Upload Video"});
 };
 export const postUpload=async(req,res)=>{
+  const user=req.session.user._id;
   const file=req.file;
   const title=req.body.title;
   const description=req.body.description;
@@ -57,6 +60,7 @@ export const postUpload=async(req,res)=>{
     title,
     description,
     fileUrl:file.path,
+    owner:user,
     hashtags:Video.formatHashtags(hashtags)
   });}
   catch(error){

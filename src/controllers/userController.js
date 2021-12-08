@@ -72,82 +72,79 @@ export const postLogin=async(req,res)=>{
     req.session.loggedIn=true;
     req.session.user=user; //findByIdUpdate해도 업데이트 안되는 이유 :pug파일에서 가져오는 locals는 session에서 가져오고 sessions는 로그인할때 저장되서 db만 바뀌고 pug파일에서 가져오는 local는 업데이트 되지 않는다. #8.3에서 이 에러 수정
     return res.status(400).redirect("/");
+};export const startGithubLogin = (req, res) => {
+  const baseUrl = "https://github.com/login/oauth/authorize";
+  const config = {
+    client_id: process.env.GH_CLIENT,
+    allow_signup: false,
+    scope: "read:user user:email",
+  };
+  const params = new URLSearchParams(config).toString();
+  const finalUrl = `${baseUrl}?${params}`;
+  return res.redirect(finalUrl);
 };
-export const startGithubLogin=(req,res)=>{
-    const baseUrl='https://github.com/login/oauth/authorize';
-    const config={
-        client_id:process.env.GH_CLIENT,
-        allow_signup:false,
-        scope:"read:user user:email"
-    }
-    const params=new URLSearchParams(config).toString();
-    const finalUrl=`${baseUrl}?${params}`;
-    return res.redirect(finalUrl);
-    //https://github.com/login/oauth/authorize?client_id=55c3cfda5e0a8e716916&allow_signup=false&scope=user:email
-};
-export const finshGithubLogin=async (req,res)=>{
-    const baseUrl = "https://github.com/login/oauth/access_token";
-    const config = {
-      client_id: process.env.GH_CLIENT,
-      client_secret: process.env.GH_SECRET,
-      code: req.query.code,
-    };
-    const params = new URLSearchParams(config).toString();
-    const finalUrl = `${baseUrl}?${params}`;
-    const data = await fetch(finalUrl, {
+
+export const finishGithubLogin = async (req, res) => {
+  const baseUrl = "https://github.com/login/oauth/access_token";
+  const config = {
+    client_id: process.env.GH_CLIENT,
+    client_secret: process.env.GH_SECRET,
+    code: req.query.code,
+  };
+  const params = new URLSearchParams(config).toString();
+  const finalUrl = `${baseUrl}?${params}`;
+  const tokenRequest = await (
+    await fetch(finalUrl, {
       method: "POST",
       headers: {
         Accept: "application/json",
       },
-    });
-    const json = await data.json();
-    const access_token=json.access_token;
-    if(access_token){
-        const apiUrl = "https://api.github.com";
-        const userData = await (
-            await fetch(`${apiUrl}/user`, {
-              headers: {
-                Authorization: `token ${access_token}`,
-              },
-            })
-          ).json();
-        const emailData = await (
-            await fetch(`${apiUrl}/user/emails`, {
-              headers: {
-                Authorization: `token ${access_token}`,
-              },
-            })
-          ).json();
-        const emailObj=emailData.find(
-            (email)=>email.primary===true&&email.verified===true
-        );
-        if(!emailObj){
-            return res.redirect("/login");
-        }
-        const existingUser=await User.findOne({email:emailObj.email});
-        if (existingUser) {
-            req.session.loggedIn = true;
-            req.session.user = existingUser;
-            return res.redirect("/");
-          } else {
-            const user = await User.create({
-                avatarUrl:userData.avatar_url,
-              name: userData.name,
-              username: userData.login,
-              email: emailObj.email,
-              password: "",
-              socialOnly: true,
-              location: userData.location,
-            });
-            req.session.loggedIn = true;
-            req.session.user = user;
-            return res.redirect("/");
-          }
+    })
+  ).json();
+  if ("access_token" in tokenRequest) {
+    const { access_token } = tokenRequest;
+    const apiUrl = "https://api.github.com";
+    const userData = await (
+      await fetch(`${apiUrl}/user`, {
+        headers: {
+          Authorization: `token ${access_token}`,
+        },
+      })
+    ).json();
+    const emailData = await (
+      await fetch(`${apiUrl}/user/emails`, {
+        headers: {
+          Authorization: `token ${access_token}`,
+        },
+      })
+    ).json();
+    const emailObj = emailData.find(
+      (email) => email.primary === true && email.verified === true
+    );
+    if (!emailObj) {
+      // set notification
+      return res.redirect("/login");
     }
-    else{
-        return res.redirect("/login");
+    let user = await User.findOne({ email: emailObj.email });
+    if (!user) {
+      user = await User.create({
+        avatarUrl: userData.avatar_url,
+        name: userData.name,
+        username: userData.login,
+        email: emailObj.email,
+        password: "",
+        socialOnly: true,
+        location: userData.location,
+      });
     }
+    req.session.loggedIn = true;
+    req.session.user = user;
+    return res.redirect("/");
+  } else {
+    return res.redirect("/login");
+  }
 };
+
 export const logout=(req,res)=>{
     req.session.destroy();
     return res.redirect("/");
@@ -177,4 +174,11 @@ export const postChangePassword=async(req,res)=>{
   console.log(user.password);
   return res.redirect("/users/logout")
 }
-export const see=(req,res)=>res.send("See User");
+export const see=async(req,res)=>{
+  const id=req.params.id;
+  const user=await User.findById(id);
+  if(!user){
+    return res.status(404).render("404",{pageTitle:"user not found"});
+  }
+  return res.render("profile",{pageTitle:`${user.name}`,user})
+};

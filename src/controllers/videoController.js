@@ -6,12 +6,11 @@ export const trending = async(req, res) =>{
 } 
 export const watch=async(req,res)=>{
   const id=req.params.id;
-  const video=await Video.findById(id);
-  const owner=await User.findById(video.owner);
+  const video=await Video.findById(id).populate("owner");
   if(video===null){
     return res.render("404",{pageTitle:"Video Not Found"});
   }
-  return res.render("watch",{pageTitle:video.title,video,owner});
+  return res.render("watch",{pageTitle:video.title,video});
 } 
 export const getEdit=async(req,res)=>{
   const id=req.params.id;
@@ -51,18 +50,22 @@ export const upload=(req,res)=>{
   return res.render("upload",{pageTitle:"Upload Video"});
 };
 export const postUpload=async(req,res)=>{
-  const user=req.session.user._id;
+  const _id=req.session.user._id;
   const file=req.file;
   const title=req.body.title;
   const description=req.body.description;
   const hashtags=req.body.hashtags;
-  try{await Video.create({
+  try{const newVideo=await Video.create({
     title,
     description,
     fileUrl:file.path,
-    owner:user,
+    owner:_id,
     hashtags:Video.formatHashtags(hashtags)
-  });}
+    });
+    const user=await User.findById(_id);
+    user.videos.push(newVideo._id);
+    user.save();
+  }
   catch(error){
     return res.status(404).render("upload",{pageTitle:"Upload Video",errorMessage:error._message});
   } 

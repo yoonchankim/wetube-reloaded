@@ -151,11 +151,15 @@ export const logout=(req,res)=>{
     return res.redirect("/");
 };
 export const getChangePassword=(req,res)=>{
+  if (req.session.user.socialOnly === true) {
+    return res.redirect("/");
+  }
   return res.render("change-password",{pageTitle:"Change Password"});
 }
 
 export const postChangePassword=async(req,res)=>{
-  const _id=req.session.user._id;
+  console.log("hello change password")
+  const id=req.session.user._id;
   const password=req.session.user.password;
   const oldPassword=req.body.oldPassword;
   const newPassword=req.body.newPassword
@@ -167,7 +171,7 @@ export const postChangePassword=async(req,res)=>{
   if(!ok){
     return res.status(400).render("change-password",{pageTitle:"Change Password",errorMessage:"old password does not match with confirmation"});
   }
-  const user=await User.findById(_id);
+  const user=await User.findById(id);
   user.password=newPassword
   console.log(user.password);
   await user.save();
